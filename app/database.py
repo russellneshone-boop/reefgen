@@ -3,6 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+# Right now: SQLite (local demo)
+# Later: replace with Postgres URL from .env
 SQLALCHEMY_DATABASE_URL = "sqlite:///./reefgen.db"
 
 engine = create_engine(
@@ -14,3 +16,4 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+

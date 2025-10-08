@@ -5,6 +5,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 
+# NEW imports for DB setup
+from app.database import Base, engine
+from app import models
+
 app = FastAPI(title="Reef-Gen API")
 
 app.add_middleware(
@@ -151,5 +155,9 @@ async def upload_scan(reef_id: int, user_id: int = Form(...), file: UploadFile =
             u["tokens"] += 5
 
     return {"message": "Scan uploaded successfully", "scan": new_scan, "tokens_awarded": 5}
+
+# ---------------- Database Setup ----------------
+Base.metadata.create_all(bind=engine)
+
 
 

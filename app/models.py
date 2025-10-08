@@ -1,4 +1,3 @@
-# app/models.py
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -13,6 +12,7 @@ class User(Base):
 
     scans = relationship("ReefScan", back_populates="user")
 
+
 class Reef(Base):
     __tablename__ = "reefs"
     id = Column(Integer, primary_key=True, index=True)
@@ -20,6 +20,7 @@ class Reef(Base):
     location = Column(String)
 
     scans = relationship("ReefScan", back_populates="reef")
+
 
 class ReefScan(Base):
     __tablename__ = "reef_scans"
@@ -32,3 +33,4 @@ class ReefScan(Base):
 
     user = relationship("User", back_populates="scans")
     reef = relationship("Reef", back_populates="scans")
+
