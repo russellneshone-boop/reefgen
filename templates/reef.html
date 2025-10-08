@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reef Details</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <a href="index.html" class="back-btn">⬅ Back</a>
+    <h1 id="reef-name">Reef</h1>
+    <div class="user-info">
+      🪙 <span id="token-count">0</span> |
+      <button id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2 style="padding:1rem;">Scans</h2>
+      <div id="scan-grid" class="scan-grid"></div>
+    </section>
+
+    <section style="padding:2rem;">
+      <h3>Upload New Scan</h3>
+      <input type="file" id="scan-file" />
+      <button id="submit-scan">Upload</button>
+    </section>
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) window.location.href = "login.html";
+    const userId = user.id;
+
+    const params = new URLSearchParams(window.location.search);
+    const reefId = params.get("id");
+
+    async function fetchUser() {
+      const res = await fetch(`/users/${userId}`);
+      const u = await res.json();
+      document.getElementById("token-count").textContent = u.tokens;
+    }
+
+    async function fetchReef() {
+      const res = await fetch(`/reefs/${reefId}`);
+      const reef = await res.json();
+      document.getElementById("reef-name").textContent = reef.name;
+    }
+
+    function renderScan(scan) {
+      const grid = document.getElementById("scan-grid");
+      const card = document.createElement("div");
+      card.className = "scan-card";
+      card.innerHTML = `
+        <img src="${scan.image_path}" alt="Coral scan"/>
+        <p>🧠 ${scan.diagnosis}</p>
+        <p>⏳ ${new Date(scan.date_taken).toLocaleString()}</p>
+      `;
+      grid.appendChild(card);
+    }
+
+    async function fetchScans() {
+      const res = await fetch(`/reefs/${reefId}/scans`);
+      const scans = await res.json();
+      scans.forEach(renderScan);
+    }
+
+    document.getElementById("submit-scan").addEventListener("click", async () => {
+      const fileInput = document.getElementById("scan-file");
+      if (!fileInput.files.length) return alert("Pick a file!");
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      formData.append("user_id", userId);
+
+      const res = await fetch(`/reefs/${reefId}/upload`, { method: "POST", body: formData });
+      const result = await res.json();
+      if (result.scan) {
+        renderScan(result.scan);
+        fetchUser();
+        alert(`✅ Uploaded! +${result.tokens_awarded} tokens`);
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "login.html";
+    });
+
+    fetchUser();
+    fetchReef();
+    fetchScans();
+  </script>
+</body>
+</html>
+

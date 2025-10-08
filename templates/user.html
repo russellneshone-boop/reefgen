@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Profile</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <a href="index.html" class="back-btn">⬅ Back</a>
+    <h1 id="username">User</h1>
+    <div class="user-info">
+      🪙 <span id="token-count">0</span> |
+      <button id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section style="padding:1rem;">
+      <h2>My Contributions</h2>
+      <div id="user-scans" class="scan-grid"></div>
+    </section>
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) window.location.href = "login.html";
+    const userId = user.id;
+
+    async function fetchUser() {
+      const res = await fetch(`/users/${userId}`);
+      const u = await res.json();
+      document.getElementById("username").textContent = `👤 ${u.username}`;
+      document.getElementById("token-count").textContent = u.tokens;
+    }
+
+    async function fetchUserScans() {
+      const res = await fetch(`/users/${userId}/scans`);
+      const scans = await res.json();
+      const grid = document.getElementById("user-scans");
+      grid.innerHTML = "";
+      if (scans.length === 0) {
+        grid.innerHTML = "<p>No contributions yet 🌱</p>";
+        return;
+      }
+      scans.forEach(s => {
+        const card = document.createElement("div");
+        card.className = "scan-card";
+        card.innerHTML = `
+          <img src="${s.image_path}" />
+          <p>🧠 ${s.diagnosis}</p>
+          <p>⏳ ${new Date(s.date_taken).toLocaleString()}</p>
+          <p>📍 ${s.reef_name}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "login.html";
+    });
+
+    fetchUser();
+    fetchUserScans();
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reef-Gen</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <h1 class="logo">🌊 Reef-Gen</h1>
+    <div class="user-info">
+      👤 <a href="user.html" style="color:white;">My Profile</a> |
+      🪙 <span id="token-count">0</span> |
+      <button id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <h2 style="padding: 1rem;">Available Reefs</h2>
+    <div id="reef-grid" class="reef-grid"></div>
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) window.location.href = "login.html";
+    const userId = user.id;
+
+    async function fetchUser() {
+      const res = await fetch(`/users/${userId}`);
+      const u = await res.json();
+      document.getElementById("token-count").textContent = u.tokens;
+    }
+
+    async function fetchReefs() {
+      const res = await fetch("/reefs");
+      const reefs = await res.json();
+      const grid = document.getElementById("reef-grid");
+      reefs.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "reef-card";
+        card.innerHTML = `
+          <h3>${r.name}</h3>
+          <p>📍 ${r.location}</p>
+          <p>📸 ${r.scan_count} scans</p>
+          <a href="reef.html?id=${r.id}">View Reef →</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "login.html";
+    });
+
+    fetchUser();
+    fetchReefs();
+  </script>
+</body>
+</html>
+
